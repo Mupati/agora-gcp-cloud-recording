@@ -36,7 +36,7 @@ def create_app():
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint)
 
-    from .agora_rtm import agora_rtm as agora_rtm_blueprint
-    app.register_blueprint(agora_rtm_blueprint)
+    from .cloud_recording import cloud_recording as cloud_recording_blueprint
+    app.register_blueprint(cloud_recording_blueprint)
 
     return app
