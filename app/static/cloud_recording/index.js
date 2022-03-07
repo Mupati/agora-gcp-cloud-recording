@@ -420,10 +420,21 @@ const app = new Vue({
         if (res.status === 200) {
           this.resourceId = res.data.resourceId;
           this.recordingSID = res.data.sid;
-          this.isRecordingStarted = true;
         }
 
-        return res.data;
+        // Get Recording Status to confirm if it was really started.
+        // Display a feedback message and show the stop button
+
+        const recordingStatus = await this.getRecordingStatus(
+          res.data.resourceId,
+          res.data.sid
+        );
+
+        if (recordingStatus.serverResponse.status === 5) {
+          this.isRecordingStarted = true;
+        } else {
+          alert("Recording Failed to Start");
+        }
       } catch (error) {
         console.log(error);
       }
@@ -448,10 +459,40 @@ const app = new Vue({
             },
           }
         );
-        if (res.status === 200) {
+
+        const recordingStatus = await this.getRecordingStatus(
+          this.resourceId,
+          this.recordingSID
+        );
+        // If the resource ID is not found you get a 404 which means the recording has stopped
+        if (recordingStatus.code === 404) {
           this.isRecordingStarted = false;
+        } else {
+          alert("Unable to stop recording");
         }
-        console.log(res);
+
+        return res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async getRecordingStatus(resourceId, sid) {
+      try {
+        const res = await axios.post(
+          "/cloud-recording/get-recording-status",
+          {
+            resourceId,
+            sid,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json;charset=utf-8",
+              "X-CSRFToken": CSRF_TOKEN,
+            },
+          }
+        );
+        return res.data;
       } catch (error) {
         console.log(error);
       }
